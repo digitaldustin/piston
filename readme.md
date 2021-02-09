@@ -1,5 +1,5 @@
 <h1 align="center">
-    <a href="https://github.com/engineer-man/piston"><img src="https://emkc.org/images/icon_circle_24.png" alt="engineer-man piston"></a>
+    <a href="https://github.com/engineer-man/piston"><img src="images/icon_circle.svg" width="25" height="25" alt="engineer-man piston"></a>
   Piston
 </h1>
 
@@ -7,7 +7,7 @@
 <br>
 
 <p align="center">
-    <a href="https://github.com/ArmynC/ArminC-AutoExec/commits/master">
+    <a href="https://github.com/engineer-man/piston/commits/master">
     <img src="https://img.shields.io/github/last-commit/engineer-man/piston.svg?style=for-the-badge&logo=github&logoColor=white"
          alt="GitHub last commit">
     <a href="https://github.com/engineer-man/piston/issues">
@@ -127,7 +127,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 nvm install --lts
 nvm use --lts
 
-sudo pacman -S lxc libvirt unzip
+pacman -S lxc libvirt unzip
 ```
 </details>
 
@@ -136,18 +136,24 @@ sudo pacman -S lxc libvirt unzip
 ```sh
 # clone and enter repo
 git clone https://github.com/engineer-man/piston
-cd piston/lxc
 ```
 
 #### Installation (simple)
 
-- Coming soon.
+- Install additional dependencies python3, pip and distrobuilder
+- `cd container && ./build.sh`
+- Wait, it may take up to an hour.
+- `lxc-create -n piston -t local -- --metadata meta.tar.xz --fstree rootfs.tar.xz`
+- `cd lxc && ./start`
+- Good to go!
+
 
 #### Installation (advanced)
 
-- See `var/install.txt` for how to create a new LXC container and install all of the required
-software.
+- See `var/install.txt` for how to build the container manually
 
+#### CLI Usage
+- `cli/execute [language] [file path] [args]`
 <br>
 
 # Usage
@@ -167,7 +173,7 @@ cd api
 ./start
 ```
 
-For your own local installation, the API is available at</h3>
+For your own local installation, the API is available at:
 
 ```
 http://127.0.0.1:2000
@@ -175,9 +181,9 @@ http://127.0.0.1:2000
 
 #### Versions Endpoint
 `GET /versions`
-This endpoint takes no input and returns a JSON array of the currently installed languages.
-
-Truncated response sample:
+This endpoint will return the supported languages along with the current version and aliases. To execute
+code for a particular language using the `/execute` endpoint, either the name or one of the aliases must
+be provided.
 ```json
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -185,14 +191,17 @@ Content-Type: application/json
 [
     {
         "name": "awk",
+        "aliases": ["awk"],
         "version": "1.3.3"
     },
     {
         "name": "bash",
+        "aliases": ["bash"],
         "version": "4.4.20"
     },
     {
         "name": "c",
+        "aliases": ["c"],
         "version": "7.5.0"
     }
 ]
@@ -200,13 +209,16 @@ Content-Type: application/json
 
 #### Execute Endpoint
 `POST /execute`
-This endpoint takes the following JSON payload and expects at least the language and source. If
-source is not provided, a blank file is passed as the source. If no `args` are desired, it can either
-be an empty array or left out entirely.
+This endpoint requests execution of some arbitrary code.
+- `language` (**required**) The language to use for execution, must be a string and supported by Piston (see list below).
+- `source` (**required**) The source code to execute, must be a string.
+- `stdin` (*optional*) The text to pass as stdin to the program. Must be a string or left out of the request.
+- `args` (*optional*) The arguments to pass to the program. Must be an array or left out of the request.
 ```json
 {
     "language": "js",
     "source": "console.log(process.argv)",
+    "stdin": "",
     "args": [
         "1",
         "2",
@@ -230,37 +242,56 @@ Content-Type: application/json
     "stderr": ""
 }
 ```
-If an invalid language is supplied, a typical response will look like the following:
+If a problem exists with the request, a `400` status code is returned and the reason in the `message` key.
 ```json
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
 
 {
-    "code": "unsupported_language",
-    "message": "whatever is not supported by Piston"
+    "message": "Supplied language is not supported by Piston"
 }
 ```
 
 <br>
 
 # Supported Languages
-|           |            |
-|:---------:|------------|
-|    awk    | julia      |
-|    bash   | kotlin     |
-| brainfuck | lua        |
-|     c     | nasm       |
-| cpp       | node       |
-| csharp    | paradoc    |
-| deno      | perl       |
-| erlang    | php        |
-| elixir    | python2    |
-| emacs     | python3    |
-| elisp     | ruby       |
-| go        | rust       |
-| haskell   | swift      |
-| java      | typescript |
-| jelly     |            |
+`awk`,
+`bash`,
+`brainfuck`,
+`c`,
+`cpp`,
+`crystal`,
+`csharp`,
+`d`,
+`dash`,
+`deno`,
+`elixir`,
+`emacs`,
+`elisp`,
+`go`,
+`haskell`,
+`java`,
+`jelly`,
+`julia`,
+`kotlin`,
+`lisp`,
+`lua`,
+`nasm`,
+`nasm64`,
+`nim`,
+`node`,
+`osabie`,
+`paradoc`,
+`perl`,
+`php`,
+`python2`,
+`python3`,
+`ruby`,
+`rust`,
+`scala`,
+`swift`,
+`typescript`,
+`zig`,
 
 <br>
 
